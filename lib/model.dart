@@ -1,4 +1,6 @@
 class TaskEntry {
+  TaskEntry();
+
   String id = '';
   String title = '';
   String description = '';
@@ -8,6 +10,18 @@ class TaskEntry {
   bool isEdit = false;
   bool isPreview = false;
 
+  Map toJson() => {
+        'id': id,
+        'title': title,
+        'description': description,
+        'estimateMin': estimateMin,
+      };
+
+  TaskEntry.fromJson(Map<String, dynamic> json)
+      : id = json['id'],
+        title = json['title'],
+        description = json['description'],
+        estimateMin = json['estimateMin'];
 
   toString() {
     return '[TaskEntry]\n#id: $id\n#title: $title\n#description: $description\n#estimateMin: $estimateMin';
@@ -45,8 +59,9 @@ class TaskEntry {
   }
 
   String toInput() {
-    if(this.title.isEmpty) return '';
-    return this.title + (this.estimateMin != 0 ? '${this.estimateMin}m':'') + (this.description.isEmpty ? '' : '\n${this.description}');
-
+    if (this.title.isEmpty) return '';
+    return this.title +
+        (this.estimateMin != 0 ? '${this.estimateMin}m' : '') +
+        (this.description.isEmpty ? '' : '\n${this.description}');
   }
 }
