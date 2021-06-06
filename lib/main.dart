@@ -40,7 +40,7 @@ class CreateTaskIntent extends Intent {}
 class _MyHomePageState extends State<MyHomePage> {
   FocusNode editFocus = FocusNode();
   FocusNode appFocus = FocusNode();
-
+  SimplePersistenceProvider persistenceProvider = SimplePersistenceProvider();
   int editIndex = -1;
   var children = <TaskEntry>[];
   var editTask = TaskEntry();
@@ -48,7 +48,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
-    FilePersistence.loadTasks()
+    persistenceProvider.loadTasks()
         .then((tasks) => setState(() => this.children = tasks))
         .whenComplete(() => setState(() => this.isLoading = false));
     super.initState();
@@ -68,7 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
       entry.isPreview = false;
       entry.isEdit = false;
       editIndex = -1;
-      FilePersistence.storeTasks(children);
+      persistenceProvider.storeTasks(children);
     });
   }
 
