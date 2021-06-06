@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'model.dart';
 
@@ -7,9 +8,10 @@ class TaskEditWidget extends StatefulWidget {
       {Key? key,
       required this.taskEntry,
       required this.onSaveCb,
-      required this.notifyChangeCb})
+      required this.notifyChangeCb,
+      required this.focusNode})
       : super(key: key);
-
+  final FocusNode focusNode;
   final TaskEntry taskEntry;
   final Function(TaskEntry) onSaveCb;
 
@@ -18,6 +20,8 @@ class TaskEditWidget extends StatefulWidget {
   @override
   TaskEditState createState() => TaskEditState();
 }
+
+class SaveIntent extends Intent {}
 
 class TaskEditState extends State<TaskEditWidget> {
   TextEditingController ctrl = TextEditingController();
@@ -40,24 +44,41 @@ class TaskEditState extends State<TaskEditWidget> {
     return Row(
       children: [
         Flexible(
+          child: FocusableActionDetector(
+            shortcuts: {
+              LogicalKeySet(
+                LogicalKeyboardKey.control, // .meta for macOS?
+                LogicalKeyboardKey.keyS,
+              ): SaveIntent()
+            },
+            actions: {
+              SaveIntent: CallbackAction(
+                  onInvoke: (i) => widget.onSaveCb(widget.taskEntry)),
+            },
             child: TextFormField(
-          minLines: 2,
-          maxLines: 6,
-          onChanged: _inputChanged,
-          controller: ctrl,
-          decoration: InputDecoration(
-              contentPadding: EdgeInsets.all(2),
-              hintText: "Task Title 20m\nFurther Task description",
-              hintStyle: TextStyle(color: Colors.grey)),
-        )),
-        IconButton(
-            onPressed: ctrl.text.isNotEmpty
-                ? () {
-                    widget.onSaveCb(widget.taskEntry.fromInput(ctrl.text));
-                    ctrl.text = '';
-                  }
-                : null,
-            icon: const Icon(Icons.add_task)),
+              focusNode: widget.focusNode,
+              minLines: 2,
+              maxLines: 6,
+              onChanged: _inputChanged,
+              controller: ctrl,
+              decoration: InputDecoration(
+                  contentPadding: EdgeInsets.all(2),
+                  hintText: "Task Title 20m\nFurther Task description",
+                  hintStyle: TextStyle(color: Colors.grey)),
+            ),
+          ),
+        ),
+        Tooltip(
+          message: "Save Task [Ctrl + S]",
+          child: IconButton(
+              onPressed: ctrl.text.isNotEmpty
+                  ? () {
+                      widget.onSaveCb(widget.taskEntry.fromInput(ctrl.text));
+                      ctrl.text = '';
+                    }
+                  : null,
+              icon: const Icon(Icons.add_task)),
+        ),
       ],
     );
   }

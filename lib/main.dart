@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:microtask/TaskEditWidget.dart';
 import 'package:microtask/TaskViewWidget.dart';
 import 'package:microtask/persistence.dart';
@@ -18,8 +19,8 @@ class MyApp extends StatelessWidget {
       title: 'Microtasks',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        primarySwatch: Colors.lightGreen,
-      ),
+          primarySwatch: Colors.lightGreen,
+          accentColor: Colors.lightGreenAccent),
       home: MyHomePage(title: 'Microtasks'),
     );
   }
@@ -34,7 +35,12 @@ class MyHomePage extends StatefulWidget {
   _MyHomePageState createState() => _MyHomePageState();
 }
 
+class CreateTaskIntent extends Intent {}
+
 class _MyHomePageState extends State<MyHomePage> {
+  FocusNode editFocus = FocusNode();
+  FocusNode appFocus = FocusNode();
+
   int editIndex = -1;
   var children = <TaskEntry>[];
   var editTask = TaskEntry();
@@ -46,11 +52,19 @@ class _MyHomePageState extends State<MyHomePage> {
         .then((tasks) => setState(() => this.children = tasks))
         .whenComplete(() => setState(() => this.isLoading = false));
     super.initState();
+
+    appFocus.requestFocus();
   }
 
   _onSave(TaskEntry entry) {
     if (this.isLoading) return;
     this.setState(() {
+      if (entry.title.isEmpty) {
+        children.removeAt(editIndex);
+        editIndex = -1;
+        appFocus.requestFocus();
+      }
+
       entry.isPreview = false;
       entry.isEdit = false;
       editIndex = -1;
@@ -68,12 +82,19 @@ class _MyHomePageState extends State<MyHomePage> {
   _createNewTask() {
     if (this.isLoading) return;
     setState(() {
+      if (children.length > 0 && editIndex == 0) {
+        editIndex = -1;
+        children.removeAt(0);
+        appFocus.requestFocus();
+        return;
+      }
       if (children.length == 0 || children[0].title.isNotEmpty) {
         var entry = TaskEntry();
         children.insert(0, entry);
       }
       children[0].isPreview = true;
       editIndex = 0;
+      editFocus.requestFocus();
     });
   }
 
@@ -84,10 +105,10 @@ class _MyHomePageState extends State<MyHomePage> {
       itemBuilder: (context, index) => index == editIndex
           ? Column(children: [
               TaskEditWidget(
-                taskEntry: children[index],
-                onSaveCb: _onSave,
-                notifyChangeCb: _onNotifyChange,
-              ),
+                  taskEntry: children[index],
+                  onSaveCb: _onSave,
+                  notifyChangeCb: _onNotifyChange,
+                  focusNode: editFocus),
               TaskViewWidget(
                   taskEntry: children[index], notifyChangeCb: _onNotifyChange)
             ])
@@ -104,19 +125,32 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-        actions: [
-          Tooltip(
-            message: "Create a new Task",
-            child: IconButton(onPressed: _createNewTask, icon: Icon(Icons.add)),
-          )
-        ],
+    return FocusableActionDetector(
+      focusNode: appFocus,
+      shortcuts: {
+        LogicalKeySet(
+          LogicalKeyboardKey.control, // .meta for macOS?
+          LogicalKeyboardKey.keyN,
+        ): CreateTaskIntent()
+      },
+      actions: {
+        CreateTaskIntent: CallbackAction(onInvoke: (i) => _createNewTask()),
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(widget.title),
+          actions: [
+            Tooltip(
+              message: "Create a new Task [Ctrl + N]",
+              child:
+                  IconButton(onPressed: _createNewTask, icon: Icon(Icons.add)),
+            )
+          ],
+        ),
+        body: Padding(
+            padding: EdgeInsets.only(top: 4),
+            child: isLoading ? loadingIndicator : listView),
       ),
-      body: Padding(
-          padding: EdgeInsets.only(top: 4),
-          child: isLoading ? loadingIndicator : listView),
     );
   }
 }
