@@ -1,16 +1,15 @@
-# microtask
+<h1>Microtask</h1>
+<p align="center">
+<img src="https://user-images.githubusercontent.com/4430308/120929712-68554e00-c6ea-11eb-80cc-f341b3f49721.png">
+</p>
+Microtask is yet another little <b>Todo App</b> to get started with flutter and dart.  
+It's currently in a <b>very early development</b> stage. So... I don't recommend using it for anything really.
 
-A new Flutter project.
+Other than the learning aspect, it's aimed to provide a simple and fast to use interface for entering tiny tasks and increase productivity between meetings. 😏
 
-## Getting Started
+Development is currently targeted towards Windows and will later experiment with the other flutter plattforms.
 
-This project is a starting point for a Flutter application.
+Language: https://dart.dev/  
+Framework: https://flutter.dev/
 
-A few resources to get you started if this is your first Flutter project:
 
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
