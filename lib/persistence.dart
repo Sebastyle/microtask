@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:html' as web;
+import 'package:universal_html/html.dart' as web;
 import 'dart:io';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
